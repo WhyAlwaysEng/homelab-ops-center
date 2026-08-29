@@ -1,0 +1,209 @@
+# ===========================================
+# Homelab & Network Ops Center
+# Production Docker Compose for Orange Pi ARM64
+# ===========================================
+#
+# Usage:
+#   Development: docker compose up (auto-loads override.yml)
+#   Production:  docker compose up -d --build
+#   View logs:   docker compose logs -f
+#   Stop:        docker compose down
+# ===========================================
+
+services:
+  # ===========================================
+  # Backend API Server
+  # ===========================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    container_name: homelab-backend
+    restart: unless-stopped
+    
+    environment:
+      - APP_ENV=${APP_ENV:-production}
+      - DEBUG=${DEBUG:-false}
+      - DB_PATH=/app/data/homelab.db
+      - FRONTEND_URL=http://${DOMAIN:-localhost}
+      
+      # Firebase (optional)
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID:-}
+      - FIREBASE_SERVICE_ACCOUNT_KEY_PATH=/app/config/serviceAccountKey.json
+      - FIREBASE_DATABASE_URL=${FIREBASE_DATABASE_URL:-}
+      
+      # Cloudflare DDNS (optional)
+      - CF_API_TOKEN=${CF_API_TOKEN:-}
+      - CF_ZONE_ID=${CF_ZONE_ID:-}
+      - CF_RECORD_ID=${CF_RECORD_ID:-}
+      - CF_RECORD_NAME=${CF_RECORD_NAME:-}
+      
+      # Notifications (optional)
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL:-}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
+      
+      # Worker intervals
+      - PING_INTERVAL=${PING_INTERVAL:-30}
+      - DDNS_CHECK_INTERVAL=${DDNS_CHECK_INTERVAL:-300}
+      - LOG_RETENTION_DAYS=${LOG_RETENTION_DAYS:-3}
+    
+    volumes:
+      # Persistent database storage
+      - homelab_data:/app/data
+      
+      # Docker socket (read-only for security)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      
+      # Firebase service account key (if using Firebase)
+      - ${FIREBASE_SERVICE_ACCOUNT_KEY_PATH:-/dev/null}:/app/config/serviceAccountKey.json:ro
+    
+    # Required for ICMP ping
+    cap_add:
+      - NET_RAW
+    
+    # Required for temperature sensor on Orange Pi
+    devices:
+      - /sys/class/thermal:/sys/class/thermal:ro
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    
+    # Resource limits (tune for your Orange Pi model)
+    deploy:
+      resources:
+        limits:
+          memory: 384M    # Increase if Orange Pi has more RAM
+          cpus: '1.0'     # Orange Pi 4 has 4 cores
+        reservations:
+          memory: 128M
+          cpus: '0.25'
+    
+    # Logging (prevent disk fill)
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    networks:
+      - homelab-network
+
+  # ===========================================
+  # Frontend Web Dashboard
+  # ===========================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    container_name: homelab-frontend
+    restart: unless-stopped
+    
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8000
+      - NEXT_PUBLIC_FIREBASE_API_KEY=${NEXT_PUBLIC_FIREBASE_API_KEY:-}
+      - NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN:-}
+      - NEXT_PUBLIC_FIREBASE_DATABASE_URL=${NEXT_PUBLIC_FIREBASE_DATABASE_URL:-}
+      - NEXT_PUBLIC_FIREBASE_PROJECT_ID=${NEXT_PUBLIC_FIREBASE_PROJECT_ID:-}
+      - NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET:-}
+      - NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID:-}
+      - NEXT_PUBLIC_FIREBASE_APP_ID=${NEXT_PUBLIC_FIREBASE_APP_ID:-}
+    
+    # Resource limits (Next.js standalone is lightweight)
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+    
+    # Logging
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    networks:
+      - homelab-network
+    
+    # Note: In production, use nginx reverse proxy
+    # Don't expose port 3000 directly
+    # ports:
+    #   - "3000:3000"
+
+  # ===========================================
+  # Nginx Reverse Proxy (Production Only)
+  # ===========================================
+  nginx:
+    image: nginx:alpine
+    container_name: homelab-nginx
+    restart: unless-stopped
+    
+    ports:
+      - "80:80"
+      - "443:443"
+    
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+      - ./nginx/html:/usr/share/nginx/html:ro
+    
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_started
+    
+    # Minimal resource usage
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: '0.1'
+    
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    networks:
+      - homelab-network
+
+  # ===========================================
+  # Certbot for Let's Encrypt SSL
+  # ===========================================
+  certbot:
+    image: certbot/certbot:latest
+    container_name: homelab-certbot
+    volumes:
+      - ./nginx/certs:/etc/letsencrypt
+      - ./nginx/html:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    profiles:
+      - ssl
+
+# ===========================================
+# Persistent Storage
+# ===========================================
+volumes:
+  homelab_data:
+    driver: local
+
+# ===========================================
+# Internal Network
+# ===========================================
+networks:
+  homelab-network:
+    driver: bridge
