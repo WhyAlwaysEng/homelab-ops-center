@@ -11,6 +11,8 @@ WORKDIR /app
 # Install system dependencies for ARM64
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
+    python3-dev \
+    linux-libc-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first (better layer caching)
