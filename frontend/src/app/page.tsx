@@ -418,6 +418,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [showAddNode, setShowAddNode] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   // Fetch all data
   const fetchData = useCallback(async () => {
@@ -541,8 +542,6 @@ export default function Dashboard() {
   }
 
   // Show login screen if not authenticated and not in demo mode
-  const [loginError, setLoginError] = useState<string | null>(null);
-
   const handleLogin = async () => {
     try {
       setLoginError(null);
