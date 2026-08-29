@@ -556,7 +556,7 @@ export default function Dashboard() {
       } else if (error?.code === 'auth/too-many-requests') {
         setLoginError('Too many attempts. Please try again later.');
       } else {
-        setLoginError('Login failed. Please check your credentials.');
+        setLoginError(`Login failed: ${error.code || error.message || 'Unknown error'}`);
       }
     }
   };
