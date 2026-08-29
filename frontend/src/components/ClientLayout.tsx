@@ -11,31 +11,16 @@ import Navigation from './Navigation';
 
 export default function ClientLayout({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const [demoMode, setDemoMode] = useState(false);
+
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     
-    // Check demo mode from localStorage
-    const checkDemoMode = () => {
-      const isDemo = localStorage.getItem('homelab_demo_mode') === 'true';
-      setDemoMode(isDemo);
-    };
-    
-    checkDemoMode();
 
-    // Listen for storage changes (when demo mode is toggled on other pages)
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key === 'homelab_demo_mode') {
-        setDemoMode(e.newValue === 'true');
-      }
-    };
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
-  const isLoggedIn = user || demoMode;
+  const isLoggedIn = !!user;
 
   return (
     <>

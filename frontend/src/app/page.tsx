@@ -13,35 +13,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
-// Mock data for demo mode
-const MOCK_METRICS: SystemMetrics = {
-  cpu: { percent: 42.3, count: 4, frequency: { current: 1800, min: 800, max: 2400 } },
-  memory: { total: 4294967296, used: 2147483648, available: 2147483648, percent: 50.0 },
-  disk: { total: 32212254720, used: 16106127360, free: 16106127360, percent: 50.0 },
-  temperature: 47.5,
-  timestamp: new Date().toISOString(),
-};
-
-const MOCK_CONTAINERS: DockerContainer[] = [
-  { id: 'a1b2c3d4', name: 'nginx-proxy', status: 'running', image: 'nginx:alpine', created: '2024-01-10T08:00:00Z', state: 'running', health: 'healthy' },
-  { id: 'e5f6g7h8', name: 'postgres-db', status: 'running', image: 'postgres:16', created: '2024-01-09T12:00:00Z', state: 'running', health: 'healthy' },
-  { id: 'i9j0k1l2', name: 'redis-cache', status: 'running', image: 'redis:7-alpine', created: '2024-01-08T10:00:00Z', state: 'running', health: 'healthy' },
-  { id: 'm3n4o5p6', name: 'grafana', status: 'exited', image: 'grafana/grafana:latest', created: '2024-01-07T14:00:00Z', state: 'exited', health: 'N/A' },
-  { id: 'q7r8s9t0', name: 'prometheus', status: 'running', image: 'prom/prometheus:latest', created: '2024-01-06T09:00:00Z', state: 'running', health: 'healthy' },
-];
-
-const MOCK_NODES: NetworkNode[] = [
-  { id: 1, name: 'Orange Pi (Prod)', host: '192.168.1.50', is_active: true, created_at: '2024-01-01T00:00:00Z', latest_check: { status: 'UP', latency_ms: 3.2, packet_loss_pct: 0, checked_at: new Date().toISOString() } },
-  { id: 2, name: 'Windows PC', host: '192.168.1.100', is_active: true, created_at: '2024-01-02T00:00:00Z', latest_check: { status: 'UP', latency_ms: 1.1, packet_loss_pct: 0, checked_at: new Date().toISOString() } },
-  { id: 3, name: 'Raspberry Pi', host: '192.168.1.60', is_active: true, created_at: '2024-01-03T00:00:00Z', latest_check: { status: 'DOWN', latency_ms: null, packet_loss_pct: 100, checked_at: new Date().toISOString() } },
-  { id: 4, name: 'NAS Synology', host: '192.168.1.200', is_active: true, created_at: '2024-01-04T00:00:00Z', latest_check: { status: 'UP', latency_ms: 12.8, packet_loss_pct: 0, checked_at: new Date().toISOString() } },
-];
-
-const MOCK_DDNS: DDNSStatus = {
-  public_ip: '203.0.113.42',
-  dns_record: { name: 'homelab.example.com', ip: '203.0.113.42', proxied: false },
-  configured: true,
-};
 import {
   fetchSystemMetrics,
   fetchContainers,
@@ -439,32 +410,17 @@ function LoadingSkeleton() {
 // ===========================================
 export default function Dashboard() {
   const { user, loginWithGoogle, logout } = useAuth();
-  const [demoMode, setDemoMode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('homelab_demo_mode') === 'true';
-    }
-    return false;
-  });
-  const isDemoInitial = typeof window !== 'undefined' && localStorage.getItem('homelab_demo_mode') === 'true';
-  const [metrics, setMetrics] = useState<SystemMetrics | null>(isDemoInitial ? MOCK_METRICS : null);
-  const [containers, setContainers] = useState<DockerContainer[]>(isDemoInitial ? MOCK_CONTAINERS : []);
-  const [nodes, setNodes] = useState<NetworkNode[]>(isDemoInitial ? MOCK_NODES : []);
-  const [ddnsStatus, setDdnsStatus] = useState<DDNSStatus | null>(isDemoInitial ? MOCK_DDNS : null);
-  const [loading, setLoading] = useState(!isDemoInitial);
+
+  const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
+  const [containers, setContainers] = useState<DockerContainer[]>([]);
+  const [nodes, setNodes] = useState<NetworkNode[]>([]);
+  const [ddnsStatus, setDdnsStatus] = useState<DDNSStatus | null>(null);
+  const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [showAddNode, setShowAddNode] = useState(false);
 
   // Fetch all data
   const fetchData = useCallback(async () => {
-    if (demoMode) {
-      // Load mock data in demo mode
-      setMetrics(MOCK_METRICS);
-      setContainers(MOCK_CONTAINERS);
-      setNodes(MOCK_NODES);
-      setDdnsStatus(MOCK_DDNS);
-      setLoading(false);
-      return;
-    }
     try {
       const [metricsData, containersData, nodesData, ddnsData] = await Promise.allSettled([
         fetchSystemMetrics(),
@@ -482,19 +438,17 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }, [demoMode]);
+  }, []);
 
   // Initial data fetch
   useEffect(() => {
-    if (demoMode) return; // Mock data already loaded via initial state
-    
     fetchData();
     
     // Auto-refresh every 5 seconds
     const interval = setInterval(fetchData, 5000);
     
     return () => clearInterval(interval);
-  }, [demoMode]);
+  }, []);
 
   // Subscribe to Firebase real-time updates
   useEffect(() => {
@@ -587,7 +541,25 @@ export default function Dashboard() {
   }
 
   // Show login screen if not authenticated and not in demo mode
-  if (!user && !demoMode) {
+  const [loginError, setLoginError] = useState<string | null>(null);
+
+  const handleLogin = async () => {
+    try {
+      setLoginError(null);
+      await loginWithGoogle();
+    } catch (error: any) {
+      console.error('Login failed:', error);
+      if (error?.code === 'auth/configuration-not-found' || error?.code === 'auth/invalid-api-key') {
+        setLoginError('Firebase is not configured. Please set up Firebase Authentication in the console.');
+      } else if (error?.code === 'auth/popup-blocked') {
+        setLoginError('Popup was blocked. Please allow popups for this site.');
+      } else {
+        setLoginError('Login failed. Please check Firebase configuration.');
+      }
+    }
+  };
+
+  if (!user) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
         <div className="glass-card p-8 max-w-md w-full text-center">
@@ -600,22 +572,13 @@ export default function Dashboard() {
           <p className="text-slate-400 mb-6">
             Sign in to access your dashboard
           </p>
-          <button onClick={loginWithGoogle} className="btn-glow w-full mb-3">
+          {loginError && (
+            <div className="mb-4 p-3 bg-rose-500/20 border border-rose-500/30 rounded-lg text-rose-400 text-sm">
+              {loginError}
+            </div>
+          )}
+          <button onClick={handleLogin} className="btn-glow w-full">
             Sign in with Google
-          </button>
-          <button
-            onClick={() => {
-              setMetrics(MOCK_METRICS);
-              setContainers(MOCK_CONTAINERS);
-              setNodes(MOCK_NODES);
-              setDdnsStatus(MOCK_DDNS);
-              setLoading(false);
-              setDemoMode(true);
-              localStorage.setItem('homelab_demo_mode', 'true');
-            }}
-            className="w-full px-4 py-2 bg-slate-800/60 border border-slate-700 text-slate-300 rounded-lg hover:bg-slate-700/60 hover:text-white transition-all duration-300"
-          >
-            Enter Demo Mode
           </button>
         </div>
       </div>
@@ -632,13 +595,9 @@ export default function Dashboard() {
               Homelab Ops Center
             </h1>
             <p className="text-slate-400 mt-1">
-              {demoMode ? 'Preview with sample data' : `Welcome back, ${user?.displayName || user?.email}`}
+              {`Welcome back, ${user?.displayName || user?.email}`}
             </p>
-            {demoMode && (
-              <span className="inline-block mt-2 px-2 py-0.5 text-xs font-medium bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded">
-                DEMO MODE
-              </span>
-            )}
+
           </div>
           <div className="flex items-center space-x-3 mt-4 md:mt-0">
             <Link
@@ -649,17 +608,10 @@ export default function Dashboard() {
               <span className="hidden md:inline">Settings</span>
             </Link>
             <button
-              onClick={() => {
-                if (demoMode) {
-                  setDemoMode(false);
-                  localStorage.removeItem('homelab_demo_mode');
-                } else {
-                  logout();
-                }
-              }}
+              onClick={logout}
               className="px-4 py-2 text-slate-400 hover:text-white transition-colors"
             >
-              {demoMode ? 'Exit Demo' : 'Sign Out'}
+              Sign Out
             </button>
           </div>
         </div>

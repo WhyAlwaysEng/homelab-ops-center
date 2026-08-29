@@ -360,7 +360,7 @@ export default function SettingsPage() {
   }
 
   // Show login if not authenticated and not in demo mode
-  if (!user && !demoMode) {
+  if (!user) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
         <div className="glass-card p-8 max-w-md w-full text-center">

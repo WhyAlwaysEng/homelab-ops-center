@@ -17,7 +17,7 @@ export default function BandwidthPage() {
   ];
 
   useEffect(() => {
-    setDemoMode(localStorage.getItem('homelab_demo_mode') === 'true');
+
     loadStats();
     const interval = setInterval(loadStats, 3000);
     return () => clearInterval(interval);
@@ -41,7 +41,7 @@ export default function BandwidthPage() {
     return `${(b / 1073741824).toFixed(2)} GB`;
   };
 
-  if (!user && !demoMode) {
+  if (!user) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
         <div className="glass-card p-8 max-w-md w-full text-center">
@@ -49,10 +49,7 @@ export default function BandwidthPage() {
           <h1 className="text-2xl font-bold gradient-text mb-2">Bandwidth Monitor</h1>
           <p className="text-slate-400 mb-6">Sign in to view bandwidth</p>
           <button onClick={loginWithGoogle} className="btn-glow w-full mb-3">Sign in with Google</button>
-          <button onClick={() => { setDemoMode(true); localStorage.setItem('homelab_demo_mode', 'true'); }}
-            className="w-full px-4 py-2 bg-slate-800/60 border border-slate-700 text-slate-300 rounded-lg hover:bg-slate-700/60 hover:text-white transition-all">
-            Enter Demo Mode
-          </button>
+
         </div>
       </div>
     );
