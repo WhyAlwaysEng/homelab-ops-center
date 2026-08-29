@@ -7,7 +7,6 @@ import { Wifi, ArrowUp, ArrowDown, RefreshCw, Loader2 } from 'lucide-react';
 
 export default function BandwidthPage() {
   const { user, loginWithGoogle } = useAuth();
-  const [demoMode, setDemoMode] = useState(false);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 

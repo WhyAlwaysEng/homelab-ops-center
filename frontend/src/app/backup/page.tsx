@@ -22,7 +22,6 @@ import {
 
 export default function BackupPage() {
   const { user, loginWithGoogle } = useAuth();
-  const [demoMode, setDemoMode] = useState(false);
   const [backups, setBackups] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);

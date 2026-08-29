@@ -7,7 +7,6 @@ import { Clock, Plus, Trash2, ToggleLeft, ToggleRight, Loader2, X } from 'lucide
 
 export default function SchedulerPage() {
   const { user, loginWithGoogle } = useAuth();
-  const [demoMode, setDemoMode] = useState(false);
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);

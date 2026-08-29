@@ -14,7 +14,6 @@ interface TerminalLine {
 
 export default function TerminalPage() {
   const { user, loginWithGoogle } = useAuth();
-  const [demoMode, setDemoMode] = useState(false);
   const [command, setCommand] = useState('');
   const [history, setHistory] = useState<TerminalLine[]>([]);
   const [running, setRunning] = useState(false);
@@ -36,7 +35,7 @@ export default function TerminalPage() {
     setCommand('');
     setRunning(true);
 
-    if (demoMode) {
+    if (false) {
       setHistory((prev) => [...prev, {
         command: cmd,
         output: `[Demo Mode] Command simulated: ${cmd}\n$ ${cmd}\noutput would appear here`,

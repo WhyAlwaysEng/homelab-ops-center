@@ -7,7 +7,6 @@ import { Power, RotateCw, XCircle, Loader2, Clock, Server } from 'lucide-react';
 
 export default function PowerPage() {
   const { user, loginWithGoogle } = useAuth();
-  const [demoMode, setDemoMode] = useState(false);
   const [status, setStatus] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);

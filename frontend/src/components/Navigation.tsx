@@ -37,24 +37,13 @@ const navItems = [
 export default function Navigation() {
   const pathname = usePathname();
   const { user } = useAuth();
-  const [demoMode, setDemoMode] = useState(false);
 
   useEffect(() => {
-    const isDemo = localStorage.getItem('homelab_demo_mode') === 'true';
-    setDemoMode(isDemo);
 
-    // Listen for storage changes (when demo mode is toggled on other pages)
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key === 'homelab_demo_mode') {
-        setDemoMode(e.newValue === 'true');
-      }
-    };
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
   // Don't show nav if not logged in and not in demo mode
-  if (!user && !demoMode) return null;
+  if (!user) return null;
 
   return (
     <>

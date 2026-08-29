@@ -264,7 +264,6 @@ export default function SettingsPage() {
   const { user, loading: authLoading, loginWithGoogle } = useAuth();
   const [settings, setSettings] = useState<AllSettings | null>(null);
   const [loading, setLoading] = useState(true);
-  const [demoMode, setDemoMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState<string | null>(null);
   const [toast, setToast] = useState<{
@@ -274,8 +273,7 @@ export default function SettingsPage() {
 
   // Check demo mode on mount
   useEffect(() => {
-    const isDemo = localStorage.getItem('homelab_demo_mode') === 'true';
-    setDemoMode(isDemo);
+
   }, []);
 
   // Load settings
@@ -370,15 +368,7 @@ export default function SettingsPage() {
           <button onClick={loginWithGoogle} className="btn-glow w-full mb-3">
             Sign in with Google
           </button>
-          <button
-            onClick={() => {
-              setDemoMode(true);
-              localStorage.setItem('homelab_demo_mode', 'true');
-            }}
-            className="w-full px-4 py-2 bg-slate-800/60 border border-slate-700 text-slate-300 rounded-lg hover:bg-slate-700/60 hover:text-white transition-all duration-300"
-          >
-            Enter Demo Mode
-          </button>
+
         </div>
       </div>
     );
