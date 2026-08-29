@@ -6,7 +6,7 @@ import { getScheduledTasks, createScheduledTask, deleteScheduledTask, toggleSche
 import { Clock, Plus, Trash2, ToggleLeft, ToggleRight, Loader2, X } from 'lucide-react';
 
 export default function SchedulerPage() {
-  const { user, loginWithGoogle } = useAuth();
+  const { user } = useAuth();
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
@@ -65,7 +65,7 @@ export default function SchedulerPage() {
           <Clock size={64} className="mx-auto text-cyan-400 mb-6" />
           <h1 className="text-2xl font-bold gradient-text mb-2">Scheduler</h1>
           <p className="text-slate-400 mb-6">Sign in to manage tasks</p>
-          <button onClick={loginWithGoogle} className="btn-glow w-full mb-3">Sign in with Google</button>
+          <p className="text-slate-400">Please <a href="/" className="text-cyan-400 hover:underline">sign in from the dashboard</a></p>
 
         </div>
       </div>

@@ -2,56 +2,47 @@
 
 /**
  * Authentication Context for Homelab & Network Ops Center
- * Provides Firebase Auth state and methods
+ * Provides Firebase Auth state and methods (Email/Password)
  */
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { 
-  auth, 
-  googleProvider 
+  auth 
 } from '@/lib/firebase';
 import { 
-  signInWithPopup, 
-  signOut, 
-  onAuthStateChanged, 
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
   User 
 } from 'firebase/auth';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  loginWithGoogle: () => Promise<void>;
+  loginWithEmail: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
-  loginWithGoogle: async () => {},
+  loginWithEmail: async () => {},
   logout: async () => {},
 });
 
-/**
- * Hook to access authentication context
- */
 export function useAuth() {
   return useContext(AuthContext);
 }
 
-/**
- * Authentication Provider component
- */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Safety timeout — always resolve loading after 3 seconds max
     const safetyTimer = setTimeout(() => {
       setLoading(false);
     }, 3000);
 
-    // If auth is not available (Firebase not configured), skip auth
     if (!auth) {
       clearTimeout(safetyTimer);
       setLoading(false);
@@ -59,7 +50,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      // Listen for auth state changes
       const unsubscribe = onAuthStateChanged(
         auth,
         (user) => {
@@ -74,7 +64,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       );
 
-      // Cleanup subscription on unmount
       return () => {
         clearTimeout(safetyTimer);
         unsubscribe();
@@ -86,32 +75,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  /**
-   * Sign in with Google popup
-   */
-  const loginWithGoogle = async () => {
-    try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (error) {
-      console.error('Login failed:', error);
-      throw error;
-    }
+  const loginWithEmail = async (email: string, password: string) => {
+    if (!auth) throw new Error('Firebase not configured');
+    await signInWithEmailAndPassword(auth, email, password);
   };
 
-  /**
-   * Sign out
-   */
   const logout = async () => {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      console.error('Logout failed:', error);
-      throw error;
-    }
+    if (!auth) throw new Error('Firebase not configured');
+    await signOut(auth);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ user, loading, loginWithEmail, logout }}>
       {children}
     </AuthContext.Provider>
   );

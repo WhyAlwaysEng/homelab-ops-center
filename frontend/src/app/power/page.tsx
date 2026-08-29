@@ -6,7 +6,7 @@ import { getPowerStatus, shutdownSystem, rebootSystem, cancelPowerAction } from 
 import { Power, RotateCw, XCircle, Loader2, Clock, Server } from 'lucide-react';
 
 export default function PowerPage() {
-  const { user, loginWithGoogle } = useAuth();
+  const { user } = useAuth();
   const [status, setStatus] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -58,7 +58,7 @@ export default function PowerPage() {
           <Power size={64} className="mx-auto text-cyan-400 mb-6" />
           <h1 className="text-2xl font-bold gradient-text mb-2">Power Management</h1>
           <p className="text-slate-400 mb-6">Sign in to manage system power</p>
-          <button onClick={loginWithGoogle} className="btn-glow w-full mb-3">Sign in with Google</button>
+          <p className="text-slate-400">Please <a href="/" className="text-cyan-400 hover:underline">sign in from the dashboard</a></p>
 
         </div>
       </div>

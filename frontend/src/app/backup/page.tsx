@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 
 export default function BackupPage() {
-  const { user, loginWithGoogle } = useAuth();
+  const { user } = useAuth();
   const [backups, setBackups] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -93,7 +93,7 @@ export default function BackupPage() {
           <Database size={64} className="mx-auto text-cyan-400 mb-6" />
           <h1 className="text-2xl font-bold gradient-text mb-2">Backup & Restore</h1>
           <p className="text-slate-400 mb-6">Sign in to manage backups</p>
-          <button onClick={loginWithGoogle} className="btn-glow w-full mb-3">Sign in with Google</button>
+          <p className="text-slate-400">Please <a href="/" className="text-cyan-400 hover:underline">sign in from the dashboard</a></p>
 
         </div>
       </div>

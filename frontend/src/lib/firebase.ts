@@ -4,7 +4,7 @@
  */
 
 import { initializeApp, getApps } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import { getDatabase, ref, onValue, off } from 'firebase/database';
 
 // Firebase configuration from environment variables
@@ -22,18 +22,18 @@ const firebaseConfig = {
 let app: any = null;
 let auth: any = null;
 let database: any = null;
-let googleProvider: any = null;
+
 
 try {
   app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
   auth = getAuth(app);
   database = getDatabase(app);
-  googleProvider = new GoogleAuthProvider();
+
 } catch (error) {
   console.warn('Firebase initialization failed (using placeholder config?):', (error as Error).message);
 }
 
-export { auth, database, googleProvider };
+export { auth, database };
 
 /**
  * Subscribe to real-time metrics updates from Firebase

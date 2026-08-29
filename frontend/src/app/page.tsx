@@ -409,7 +409,7 @@ function LoadingSkeleton() {
 // Main Dashboard Component
 // ===========================================
 export default function Dashboard() {
-  const { user, loginWithGoogle, logout } = useAuth();
+  const { user, loginWithEmail, logout } = useAuth();
 
   const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
   const [containers, setContainers] = useState<DockerContainer[]>([]);
@@ -536,27 +536,36 @@ export default function Dashboard() {
     return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
   };
 
+  // Handle login
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setLoginError(null);
+      await loginWithEmail(email, password);
+    } catch (error: any) {
+      console.error('Login failed:', error);
+      if (error?.code === 'auth/user-not-found') {
+        setLoginError('User not found. Please contact admin.');
+      } else if (error?.code === 'auth/wrong-password') {
+        setLoginError('Wrong password. Please try again.');
+      } else if (error?.code === 'auth/invalid-email') {
+        setLoginError('Invalid email address.');
+      } else if (error?.code === 'auth/too-many-requests') {
+        setLoginError('Too many attempts. Please try again later.');
+      } else {
+        setLoginError('Login failed. Please check your credentials.');
+      }
+    }
+  };
+
   // Show loading skeleton (only data loading, not auth loading)
   if (loading) {
     return <LoadingSkeleton />;
   }
 
-  // Show login screen if not authenticated and not in demo mode
-  const handleLogin = async () => {
-    try {
-      setLoginError(null);
-      await loginWithGoogle();
-    } catch (error: any) {
-      console.error('Login failed:', error);
-      if (error?.code === 'auth/configuration-not-found' || error?.code === 'auth/invalid-api-key') {
-        setLoginError('Firebase is not configured. Please set up Firebase Authentication in the console.');
-      } else if (error?.code === 'auth/popup-blocked') {
-        setLoginError('Popup was blocked. Please allow popups for this site.');
-      } else {
-        setLoginError('Login failed. Please check Firebase configuration.');
-      }
-    }
-  };
 
   if (!user) {
     return (
@@ -576,9 +585,31 @@ export default function Dashboard() {
               {loginError}
             </div>
           )}
-          <button onClick={handleLogin} className="btn-glow w-full">
-            Sign in with Google
-          </button>
+          <form onSubmit={handleLogin}>
+            <div className="mb-4">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email"
+                required
+                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
+              />
+            </div>
+            <div className="mb-6">
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                required
+                className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
+              />
+            </div>
+            <button type="submit" className="btn-glow w-full">
+              Sign In
+            </button>
+          </form>
         </div>
       </div>
     );

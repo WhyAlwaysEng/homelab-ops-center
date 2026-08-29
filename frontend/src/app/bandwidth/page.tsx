@@ -6,7 +6,7 @@ import { getBandwidthStats } from '@/lib/system-api';
 import { Wifi, ArrowUp, ArrowDown, RefreshCw, Loader2 } from 'lucide-react';
 
 export default function BandwidthPage() {
-  const { user, loginWithGoogle } = useAuth();
+  const { user } = useAuth();
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -47,7 +47,7 @@ export default function BandwidthPage() {
           <Wifi size={64} className="mx-auto text-cyan-400 mb-6" />
           <h1 className="text-2xl font-bold gradient-text mb-2">Bandwidth Monitor</h1>
           <p className="text-slate-400 mb-6">Sign in to view bandwidth</p>
-          <button onClick={loginWithGoogle} className="btn-glow w-full mb-3">Sign in with Google</button>
+          <p className="text-slate-400">Please <a href="/" className="text-cyan-400 hover:underline">sign in from the dashboard</a></p>
 
         </div>
       </div>

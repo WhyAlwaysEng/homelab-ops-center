@@ -261,7 +261,7 @@ function StatusToast({
 // Main Settings Page
 // ===========================================
 export default function SettingsPage() {
-  const { user, loading: authLoading, loginWithGoogle } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [settings, setSettings] = useState<AllSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -365,8 +365,7 @@ export default function SettingsPage() {
           <Settings size={64} className="mx-auto text-cyan-400 mb-6" />
           <h1 className="text-2xl font-bold gradient-text mb-2">Settings</h1>
           <p className="text-slate-400 mb-6">Sign in to access settings</p>
-          <button onClick={loginWithGoogle} className="btn-glow w-full mb-3">
-            Sign in with Google
+          <p className="text-slate-400">Please <a href="/" className="text-cyan-400 hover:underline">sign in from the dashboard</a></p>
           </button>
 
         </div>

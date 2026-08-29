@@ -13,7 +13,7 @@ interface TerminalLine {
 }
 
 export default function TerminalPage() {
-  const { user, loginWithGoogle } = useAuth();
+  const { user } = useAuth();
   const [command, setCommand] = useState('');
   const [history, setHistory] = useState<TerminalLine[]>([]);
   const [running, setRunning] = useState(false);
@@ -73,7 +73,7 @@ export default function TerminalPage() {
           <TerminalIcon size={64} className="mx-auto text-cyan-400 mb-6" />
           <h1 className="text-2xl font-bold gradient-text mb-2">Terminal</h1>
           <p className="text-slate-400 mb-6">Sign in to access terminal</p>
-          <button onClick={loginWithGoogle} className="btn-glow w-full mb-3">Sign in with Google</button>
+          <p className="text-slate-400">Please <a href="/" className="text-cyan-400 hover:underline">sign in from the dashboard</a></p>
 
         </div>
       </div>
