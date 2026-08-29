@@ -40,11 +40,11 @@ export default function PowerPage() {
     if (action !== 'cancel' && !confirm(`Are you sure you want to ${action}?`)) return;
     setActionLoading(action);
     try {
-      let result;
+      let result: any;
       if (action === 'shutdown') result = await shutdownSystem();
       else if (action === 'reboot') result = await rebootSystem();
       else result = await cancelPowerAction();
-      setToast({ msg: result.message || 'Action queued', ok: true });
+      setToast({ msg: result?.message || 'Action queued', ok: true });
     } catch {
       setToast({ msg: 'Action failed (production only)', ok: false });
     } finally {
