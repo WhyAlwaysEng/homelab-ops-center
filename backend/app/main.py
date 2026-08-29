@@ -16,7 +16,7 @@ import time
 
 from app.config import settings
 from app.database import get_db, close_db, run_retention_cleanup
-from app.routers import system, network, ddns, settings, backup, terminal, power, bandwidth, logs, scheduler
+from app.routers import system, network, ddns, settings as settings_router, backup, terminal, power, bandwidth, logs, scheduler
 from app.services.firebase_service import initialize_firebase
 
 # Configure logging
@@ -143,7 +143,7 @@ app.add_middleware(
 app.include_router(system.router)
 app.include_router(network.router)
 app.include_router(ddns.router)
-app.include_router(settings.router)
+app.include_router(settings_router.router)
 app.include_router(backup.router)
 app.include_router(terminal.router)
 app.include_router(power.router)
