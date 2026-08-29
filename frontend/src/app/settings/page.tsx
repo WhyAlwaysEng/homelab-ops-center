@@ -366,8 +366,6 @@ export default function SettingsPage() {
           <h1 className="text-2xl font-bold gradient-text mb-2">Settings</h1>
           <p className="text-slate-400 mb-6">Sign in to access settings</p>
           <p className="text-slate-400">Please <a href="/" className="text-cyan-400 hover:underline">sign in from the dashboard</a></p>
-          </button>
-
         </div>
       </div>
     );
