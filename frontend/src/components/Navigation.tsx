@@ -3,7 +3,7 @@
 /**
  * Navigation Component for Homelab & Network Ops Center
  * Fixed sidebar for desktop, bottom bar for mobile
- * Only visible after login or demo mode
+ * Only visible after login
  */
 
 import { usePathname } from 'next/navigation';
@@ -42,7 +42,7 @@ export default function Navigation() {
 
   }, []);
 
-  // Don't show nav if not logged in and not in demo mode
+  // Don't show nav if not logged in
   if (!user) return null;
 
   return (

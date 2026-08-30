@@ -10,10 +10,7 @@ export default function BandwidthPage() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const MOCK_INTERFACES = [
-    { name: 'eth0', bytes_sent: 1073741824, bytes_recv: 5368709120, send_rate: 1048576, recv_rate: 5242880, send_rate_human: '1.0 MB/s', recv_rate_human: '5.0 MB/s', addresses: [{ type: 'IPv4', address: '192.168.1.50' }] },
-    { name: 'wlan0', bytes_sent: 268435456, bytes_recv: 134217728, send_rate: 262144, recv_rate: 524288, send_rate_human: '256.0 KB/s', recv_rate_human: '512.0 KB/s', addresses: [{ type: 'IPv4', address: '192.168.1.51' }] },
-  ];
+
 
   useEffect(() => {
 
@@ -27,7 +24,7 @@ export default function BandwidthPage() {
       const data = await getBandwidthStats();
       setStats(data);
     } catch {
-      if (!stats) setStats({ interfaces: MOCK_INTERFACES });
+      
     } finally {
       setLoading(false);
     }

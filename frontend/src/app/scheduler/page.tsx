@@ -39,16 +39,16 @@ export default function SchedulerPage() {
       setShowAdd(false);
       setForm({ name: '', command: '', interval_seconds: 3600 });
       await loadTasks();
-    } catch { /* demo mode */ }
+    } catch {  }
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm('Delete this task?')) return;
-    try { await deleteScheduledTask(id); await loadTasks(); } catch { /* demo mode */ }
+    try { await deleteScheduledTask(id); await loadTasks(); } catch {  }
   };
 
   const handleToggle = async (id: number) => {
-    try { await toggleScheduledTask(id); await loadTasks(); } catch { /* demo mode */ }
+    try { await toggleScheduledTask(id); await loadTasks(); } catch {  }
   };
 
   const formatInterval = (s: number) => {

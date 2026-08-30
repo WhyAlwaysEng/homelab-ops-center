@@ -35,16 +35,7 @@ export default function TerminalPage() {
     setCommand('');
     setRunning(true);
 
-    if (false) {
-      setHistory((prev) => [...prev, {
-        command: cmd,
-        output: `[Demo Mode] Command simulated: ${cmd}\n$ ${cmd}\noutput would appear here`,
-        isError: false,
-        timestamp: new Date(),
-      }]);
-      setRunning(false);
-      return;
-    }
+    
 
     try {
       const result = await execCommand(cmd);

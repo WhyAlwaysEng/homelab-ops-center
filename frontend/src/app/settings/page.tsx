@@ -271,7 +271,7 @@ export default function SettingsPage() {
     type: 'success' | 'error' | 'loading';
   } | null>(null);
 
-  // Check demo mode on mount
+  // Check auth on mount
   useEffect(() => {
 
   }, []);
@@ -357,7 +357,7 @@ export default function SettingsPage() {
     );
   }
 
-  // Show login if not authenticated and not in demo mode
+  // Show login if not authenticated
   if (!user) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">

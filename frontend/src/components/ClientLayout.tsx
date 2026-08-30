@@ -27,7 +27,7 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
       {/* Rainbow gradient top bar */}
       <div className="gradient-bar h-1 w-full fixed top-0 left-0 z-50" />
 
-      {/* Navigation - only visible when logged in or demo mode */}
+      {/* Navigation - only visible when logged in */}
       {mounted && isLoggedIn && <Navigation />}
 
       {/* Main content */}
